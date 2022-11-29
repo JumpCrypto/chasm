@@ -1,0 +1,13 @@
+syntax = "proto3";
+package chasm;
+option go_package = "github.com/jumpcrypto/chasm/x/types";
+
+import "chasm/state.proto";
+import "gogoproto/gogo.proto";
+
+// GenesisState defines the chasm module's genesis state.
+message GenesisState {
+  repeated Cluster clusters = 1 [(gogoproto.nullable) = false];
+  repeated Key keys = 2 [(gogoproto.nullable) = false];
+  repeated Signature signatures = 3 [(gogoproto.nullable) = false];
+}

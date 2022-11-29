@@ -1,0 +1,165 @@
+syntax = "proto3";
+package chasm;
+option go_package = "github.com/jumpcrypto/chasm/x/types";
+
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "chasm/state.proto";
+import "gogoproto/gogo.proto";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Queries a cluster by name.
+	rpc Cluster(QueryClusterRequest) returns (QueryClusterResponse) {
+		option (google.api.http).get = "/chasm/cluster/{name}";
+	}
+
+	// Queries a list of cluster items.
+	rpc Clusters(QueryClustersRequest) returns (QueryClustersResponse) {
+		option (google.api.http).get = "/chasm/clusters";
+	}
+
+  // Queries a key by name.
+	rpc Key(QueryKeyRequest) returns (QueryKeyResponse) {
+		option (google.api.http).get = "/chasm/key/{name}";
+	}
+
+	// Queries a list of key items.
+	rpc Keys(QueryKeysRequest) returns (QueryKeysResponse) {
+		option (google.api.http).get = "/chasm/keys";
+	}
+
+  // Queries a signature by name.
+	rpc Signature(QuerySignatureRequest) returns (QuerySignatureResponse) {
+		option (google.api.http).get = "/chasm/signature/{name}";
+	}
+
+	// Queries a list of signature items.
+	rpc Signatures(QuerySignaturesRequest) returns (QuerySignaturesResponse) {
+		option (google.api.http).get = "/chasm/signatures";
+	}
+
+	// Queries the list of pending key gen items.
+	rpc PendingGenerateKeys(QueryPendingGenerateKeysRequest) returns (QueryPendingGenerateKeysResponse) {
+		option (google.api.http).get = "/chasm/pending_generate_keys";
+	}
+
+	// Queries the list of pending key gen items.
+	rpc PendingDeriveChildKeys(QueryPendingDeriveChildKeysRequest) returns (QueryPendingDeriveChildKeysResponse) {
+		option (google.api.http).get = "/chasm/pending_derive_child_keys";
+	}
+
+	// Queries the list of pending key unwrap items.
+	rpc PendingUnwrapKeys(QueryPendingUnwrapKeysRequest) returns (QueryPendingUnwrapKeysResponse) {
+		option (google.api.http).get = "/chasm/pending_unwrap_keys";
+	}
+
+	// Queries the list of pending sign items.
+	rpc PendingSigns(QueryPendingSignsRequest) returns (QueryPendingSignsResponse) {
+		option (google.api.http).get = "/chasm/pending_signs";
+	}
+
+	// Queries the list of failed requests
+	rpc FailedRequests(QueryFailedRequestsRequest) returns (QueryFailedRequestsResponse) {
+		option (google.api.http).get = "/chasm/failed_requests";
+	}
+}
+
+message QueryClusterRequest {
+	  string name = 1;
+}
+
+message QueryClusterResponse {
+	Cluster cluster = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryClustersRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryClustersResponse {
+	repeated Cluster clusters = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryKeyRequest {
+	  string name = 1;
+}
+
+message QueryKeyResponse {
+	Key key = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryKeysRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryKeysResponse {
+	repeated Key keys = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QuerySignatureRequest {
+	  string name = 1;
+}
+
+message QuerySignatureResponse {
+	Signature signature = 1 [(gogoproto.nullable) = false];
+}
+
+message QuerySignaturesRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QuerySignaturesResponse {
+	repeated Signature signatures = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+
+
+message QueryPendingGenerateKeysRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryPendingGenerateKeysResponse {
+	repeated PendingGenerateKey keys = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryPendingDeriveChildKeysRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryPendingDeriveChildKeysResponse {
+	repeated PendingDeriveChildKey childs = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryPendingUnwrapKeysRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryPendingUnwrapKeysResponse {
+	repeated PendingUnwrapKey keys = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryPendingSignsRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryPendingSignsResponse {
+	repeated PendingSign signatures = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryFailedRequestsRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryFailedRequestsResponse {
+	repeated FailedRequest requests = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+

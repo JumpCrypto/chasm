@@ -1,0 +1,215 @@
+syntax = "proto3";
+package chasm;
+option go_package = "github.com/jumpcrypto/chasm/x/types";
+
+enum Algorithm {
+  ALG_SECRET = 0;
+
+  ALG_ED255 = 1;
+  ALG_K256 = 2;
+  ALG_P256 = 3;
+  ALG_X255 = 4;
+  ALG_RISTRETTO255 = 5;
+  ALG_K256_TAPROOT = 6;
+}
+
+// cf. https://cryptography.io/en/latest/hazmat/primitives/asymmetric/serialization/
+
+enum PublicKeyFormat {
+
+  // Invalid choice. Be explicit!
+  PK_UNDEFINED = 0;
+
+  // big-endian U256 X-coordinate, then big-endian U256 Y-coordinate
+  // the raw big-endian U256 secret number as 32 bytes
+  PK_RAW = 1;
+
+  // 0x02 or 0x03 depending on sign of Y-coordinate, then big-endian U256 X-coordinate
+  // Python cryptography calls this "CompressedPoint"
+  PK_COMPRESSED_POINT = 2;
+
+  // 0x04, then the same as PK_RAW
+  // Python cryptography calls this "UncompressedPoint"
+  PK_UNCOMPRESSED_POINT = 3;
+
+  // the UTF-8 string (e.g. `age1txvvuecr2fyypyuwhy867gghjvmju8h0jfdmu938yaegq6dsxdcsy7xk5p` for X255 age recipients), encoded as bytes
+  PK_AGE = 4;
+}
+
+enum SecretKeyFormat {
+
+  // Invalid choice. Be explicit!
+  SK_UNDEFINED = 0;
+
+  // the raw U256 secret, as 32 big-endian bytes
+  SK_RAW = 1;
+
+  // PKCS8 v1 (RFC 5208)
+  SK_PKCS8 = 2;
+
+  // SK_SEC1 = 2;
+  // we don't currently do BIP32-ish things, this is just encoding a 32 byte secret in 24 words from the standard English language
+  // cf. e.g. https://docs.rs/hkd32/0.6.0/hkd32/struct.KeyMaterial.html
+  SK_PHRASE = 3;
+
+  // example: AGE-SECRET-KEY-1HR479D3GGXAF0F9QGZU4KMZZXC7SHSURR5QWHC8ZN264RUKMPFGSMTH26K
+  SK_AGE = 4;
+
+  /* // Note that we handle PubliceKeyFormat (compressed or not) explicitly and separately */
+  /* // cf. https://en.bitcoin.it/wiki/Wallet_import_format */
+  /* SK_WIF = 4; */
+  /* // Note that we handle PubliceKeyFormat (compressed or not) explicitly and separately */
+  /* // cf. https://en.bitcoin.it/wiki/Wallet_import_format */
+  /* SK_WIFC = 5; */
+}
+
+enum SignatureFormat {
+  // Invalid choice. Be explicit!
+  SIG_UNDEFINED = 0;
+
+  // First U256 r as 32 big-endian bytes, then U256 s as 32 big-endian bytes. 64 bytes.
+  SIG_RAW = 1;
+
+  // The raw signature, followed by a "recovery byte". 65 bytes.
+  SIG_RAW_WITH_RECOVERY = 2;
+
+  // DER-encoding of ASN.1 wrapping of `(r, s)`: SEQUENCE 0x30, length, INTEGER 0x02, length, r,...
+  // typically: `0x30 0x44 0x02 0x20 <r[32]> 0x02 0x20 <s[32]>` (70-71 bytes)
+  SIG_DER = 3;
+}
+
+// Metadata for each request and response
+message Re {
+  // Request or remote-procedure *call* ID/name.
+  // Must be globally unique for new requests - easiest to use UUID4
+  string name = 1;
+  // seconds since UNIX epoch (e.g. time.Now().Unix() in Go)
+  int64 at = 2;
+}
+
+// Cluster defines a chasm cluster. It is mostly informational.
+message Cluster {
+  string name = 2;
+  /* uint32 nodes = 3 [deprecated = true]; */
+  reserved 3;
+  reserved "nodes";
+  repeated Algorithm algorithms = 4;
+  // leave empty for non-networked clusters
+  // numbers must be >= 1, but don't have type system support
+  repeated uint32 participants = 5;
+  // threshold used for keygen, missing/zero interpreted as 1
+  uint32 threshold = 6;
+}
+
+// Metadata describing a key
+message KeyMeta {
+  string name = 1;
+  string cluster = 2;
+  Algorithm algorithm = 3;
+  uint32 threshold = 4;
+  /* uint32 shares = 5 [deprecated = true]; */
+  reserved 5;
+  reserved "shares";
+  PublicKeyFormat format = 6;
+  repeated uint32 participants = 7;
+}
+
+// Metadata describing a key
+message ChildMeta {
+  string name = 1;
+  string cluster = 2;
+  string parent = 3;
+  uint32 child = 4;
+  /* we don't really want to offer anything byte chain = [0u8; 32] */
+  /* bytes chain_code = ?; */
+
+  PublicKeyFormat format = 5;
+}
+
+// Data defining a key
+message KeyData {
+  bytes public_key = 1;
+}
+
+// Brief history on when object was requested and actually created
+message When {
+  int64 requested_at = 1;
+  int64 responded_at = 2;
+}
+
+// Core state object: cryptographic key that may be used.
+message Key {
+  When when = 1;
+  KeyMeta meta = 2;
+  KeyData data = 3;
+}
+
+message PendingGenerateKey {
+  Re re = 1;
+  KeyMeta meta = 2;
+}
+
+message PendingDeriveChildKey {
+  Re re = 1;
+  ChildMeta meta = 2;
+}
+
+message WrappedKeyData {
+  string wrapping_key = 1;
+  SecretKeyFormat format = 2;
+  bytes wrapped_key = 3;
+}
+
+/* message WrappedKey { */
+/*   KeyMeta meta = 1; */
+/*   WrappedKeyData wrapped_data = 2; */
+/* } */
+
+message PendingUnwrapKey {
+  Re re = 1;
+  KeyMeta meta = 2;
+  WrappedKeyData wrapped_data = 3;
+}
+
+// NB: Would really like to model (data, prehashed) pair as
+// enum { Message(str), Digest(str) }, but alas, this is Go/Proto...
+message SignatureMeta {
+  string name = 1;
+  string cluster = 2;
+  string key = 3;
+  bytes data = 4;
+  bool prehashed = 5;
+  SignatureFormat format = 6;
+  repeated uint32 participants = 7;
+}
+
+message SignatureData {
+  bytes signature = 1;
+}
+
+message PendingSign {
+  Re re = 1;
+  SignatureMeta meta = 2;
+}
+
+// Core state object: generated signature.
+message Signature {
+  When when = 1;
+  SignatureMeta meta = 2;
+  SignatureData data = 3;
+}
+
+message FailedRequestData {
+  string error = 1;
+}
+
+message FailedRequest {
+  string name = 1;
+  When when = 2;
+  /* oneof request { */
+    PendingGenerateKey generate_key = 3;
+    PendingUnwrapKey unwrap_key = 4;
+    PendingSign sign = 5;
+  /* } */
+  FailedRequestData data = 6;
+}

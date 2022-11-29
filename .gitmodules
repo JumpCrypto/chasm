@@ -1,0 +1,6 @@
+[submodule "cosmos-sdk-go"]
+	path = chasm-types/proto/cosmos-sdk-go
+	url = https://github.com/cosmos/cosmos-sdk.git
+[submodule "wasmd-go"]
+	path = chasm-types/proto/wasmd-go
+	url = https://github.com/CosmWasm/wasmd.git

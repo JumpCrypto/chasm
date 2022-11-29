@@ -1,0 +1,9 @@
+/target
+**/*.rs.bk
+venv
+**/*.log
+dbs
+__pycache__
+many.db
+many.log
+many.toml

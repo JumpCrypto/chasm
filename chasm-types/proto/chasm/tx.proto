@@ -1,0 +1,103 @@
+syntax = "proto3";
+package chasm;
+option go_package = "github.com/jumpcrypto/chasm/x/types";
+
+import "chasm/state.proto";
+
+// Msg defines the Msg service.
+// TODO: Can we count on the "returns" always being `google.protobuf.Empty`?
+service Msg {
+  rpc RegisterCluster(MsgRegisterCluster) returns (MsgRegisterClusterResponse);
+
+  rpc GenerateKey(MsgGenerateKey) returns (MsgGenerateKeyResponse);
+  rpc GeneratedKey(MsgGeneratedKey) returns (MsgGeneratedKeyResponse);
+
+  rpc DeriveChildKey(MsgDeriveChildKey) returns (MsgDeriveChildKeyResponse);
+  rpc DerivedChildKey(MsgDerivedChildKey) returns (MsgDerivedChildKeyResponse);
+
+  rpc UnwrapKey(MsgUnwrapKey) returns (MsgUnwrapKeyResponse);
+  rpc UnwrappedKey(MsgUnwrappedKey) returns (MsgUnwrappedKeyResponse);
+
+  rpc Sign(MsgSign) returns (MsgSignResponse);
+  rpc Signed(MsgSigned) returns (MsgSignedResponse);
+
+  rpc FailedRequest(MsgFailedRequest) returns (MsgFailedRequestResponse);
+}
+
+message MsgRegisterCluster {
+  string registrant = 1;
+  Re re = 2;
+  Cluster cluster = 3;
+}
+message MsgRegisterClusterResponse {}
+
+
+message MsgGenerateKey {
+  string requestor = 1;
+  PendingGenerateKey request = 2;
+}
+message MsgGenerateKeyResponse {}
+
+message MsgGeneratedKey {
+  string responder = 1;
+  Re re = 2;
+  KeyData data = 3;
+}
+message MsgGeneratedKeyResponse {}
+
+
+message MsgDeriveChildKey {
+  string requestor = 1;
+  PendingDeriveChildKey request = 2;
+}
+message MsgDeriveChildKeyResponse {}
+
+message MsgDerivedChildKey {
+  string responder = 1;
+  Re re = 2;
+  KeyData data = 3;
+}
+message MsgDerivedChildKeyResponse {}
+
+
+message MsgUnwrapKey {
+  string requestor = 1;
+  PendingUnwrapKey request = 2;
+}
+message MsgUnwrapKeyResponse {}
+
+message MsgUnwrappedKey {
+  string responder = 1;
+  Re re = 2;
+  KeyData data = 3;
+}
+message MsgUnwrappedKeyResponse {}
+
+
+message MsgSign {
+  string requestor = 1;
+  PendingSign request = 2;
+}
+message MsgSignResponse {}
+
+message MsgSigned {
+  string responder = 1;
+  Re re = 2;
+  SignatureData data = 3;
+}
+message MsgSignedResponse {}
+
+message MsgFailedRequest {
+  string responder = 1;
+  Re re = 2;
+  FailedRequestData data = 3;
+}
+
+message MsgFailedRequestResponse {}
+
+message MsgHeartbeat {
+  string responder = 1;
+  Re re = 2;
+}
+
+message MsgHeartbeatResponse {}
