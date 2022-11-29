@@ -1,6 +1,6 @@
 # Chasm
 
-Preminary release of Chasm to enable projects to start using the interface and types for testing.
+Preliminary release of Chasm to enable projects to start using the interface and types for testing.
 
 Chasm kind of stands for "cloud high-availability security module",
 and offers thresholded key generation and signing services for
